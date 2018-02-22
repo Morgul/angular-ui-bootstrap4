@@ -161,21 +161,24 @@ angular.module('ui.bootstrap.tooltip', ['ui.bootstrap.position', 'ui.bootstrap.s
 
               if (!positionTimeout) {
                 positionTimeout = $timeout(function() {
-                  var ttPosition = $position.positionElements(element, tooltip, ttScope.placement, appendToBody);
-                  var initialHeight = angular.isDefined(tooltip.offsetHeight) ? tooltip.offsetHeight : tooltip.prop('offsetHeight');
-                  var elementPos = appendToBody ? $position.offset(element) : $position.position(element);
-                  tooltip.css({ top: ttPosition.top + 'px', left: ttPosition.left + 'px' });
-                  var placementClasses = ttPosition.placement.split('-');
-
-                  if (!tooltip.hasClass(placementClasses[0])) {
+                  var placementClasses = $position.parsePlacement(ttScope.placement);
+                  var placement = placementClasses[1] === 'center' ? placementClasses[0] : placementClasses[0] + '-' + placementClasses[1];
+				  
+				  // need to add classes prior to placement to allow correct tooltip width calculations
+				  if (!tooltip.hasClass(placementClasses[0])) {
                     tooltip.removeClass(lastPlacement.split('-')[0]);
                     tooltip.addClass(placementClasses[0]);
                   }
 
-                  if (!tooltip.hasClass(options.placementClassPrefix + ttPosition.placement)) {
+                  if (!tooltip.hasClass(options.placementClassPrefix + placement)) {
                     tooltip.removeClass(options.placementClassPrefix + lastPlacement);
-                    tooltip.addClass(options.placementClassPrefix + ttPosition.placement);
+                    tooltip.addClass(options.placementClassPrefix + placement);
                   }
+                  
+                  var ttPosition = $position.positionElements(element, tooltip, ttScope.placement, appendToBody);
+                  var initialHeight = angular.isDefined(tooltip.offsetHeight) ? tooltip.offsetHeight : tooltip.prop('offsetHeight');
+                  var elementPos = appendToBody ? $position.offset(element) : $position.position(element);
+                  tooltip.css({ top: ttPosition.top + 'px', left: ttPosition.left + 'px' });
 
                   adjustmentTimeout = $timeout(function() {
                     var currentHeight = angular.isDefined(tooltip.offsetHeight) ? tooltip.offsetHeight : tooltip.prop('offsetHeight');
